@@ -1,31 +1,69 @@
-<!DOCTYPE html>
-<html lang="lv">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kriptas - Bezmaksas kurss par ieguldījumiem kriptovalūtās</title>
-    <meta name="description" content="Bezmaksas apmācību kurss par veiksmīgu ieguldījumu uzsākšanu kriptovalūtās. Uzzini par Bitcoin, Ethereum un citām digitālajām valūtām no Capitalia ekspertiem." />
-    <meta name="keywords" content="kriptovalūtas, bitcoin, ethereum, ieguldījumi, kurss, apmācība, Latvija, Capitalia, blokķēde, investīcijas" />
-    <meta name="author" content="Kriptas" />
-    <link rel="icon" href="/favicon.ico" type="image/png">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://kriptas.com/" />
-    <meta property="og:title" content="Kriptas - Bezmaksas kurss par ieguldījumiem kriptovalūtās" />
-    <meta property="og:description" content="Bezmaksas apmācību kurss par veiksmīgu ieguldījumu uzsākšanu kriptovalūtās. Uzzini par Bitcoin, Ethereum un citām digitālajām valūtām no Capitalia ekspertiem." />
-    <meta property="og:image" content="/lovable-uploads/28e8744b-0d21-4285-b276-6ccbab820726.png" />
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BTC</title>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    background: #000;
+    color: #33ff33;
+    font-family: "Cascadia Mono", "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Consolas, "Courier New", monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 0 8px rgba(51, 255, 51, 0.35);
+  }
+  #price {
+    font-size: clamp(3rem, 13vw, 12rem);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  #label {
+    margin-top: 1.5rem;
+    font-size: clamp(0.8rem, 1.6vw, 1.2rem);
+    color: #1d8f1d;
+    letter-spacing: 0.35em;
+  }
+</style>
+</head>
+<body>
+  <div id="price">&hellip;</div>
+  <div id="label">BTC / EUR</div>
+<script>
+  const priceEl = document.getElementById("price");
 
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://kriptas.com/" />
-    <meta name="twitter:title" content="Kriptas - Bezmaksas kurss par ieguldījumiem kriptovalūtās" />
-    <meta name="twitter:description" content="Bezmaksas apmācību kurss par veiksmīgu ieguldījumu uzsākšanu kriptovalūtās." />
-    <meta name="twitter:image" content="/lovable-uploads/28e8744b-0d21-4285-b276-6ccbab820726.png" />
-  </head>
+  function render(eur) {
+    priceEl.textContent = "€" + Math.round(eur).toLocaleString("en-US");
+  }
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  async function fetchPrice() {
+    try {
+      const r = await fetch("https://api.coinbase.com/v2/prices/BTC-EUR/spot");
+      const j = await r.json();
+      return parseFloat(j.data.amount);
+    } catch {
+      const r = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BTCEUR");
+      const j = await r.json();
+      return parseFloat(j.price);
+    }
+  }
+
+  async function tick() {
+    try {
+      render(await fetchPrice());
+    } catch {
+      /* keep last shown value; retry on next tick */
+    }
+  }
+
+  tick();
+  setInterval(tick, 5000);
+</script>
+</body>
 </html>
